@@ -28,7 +28,7 @@ npm ci --prefix website
 npm run dev --prefix website
 ```
 
-Open the local URL printed by Astro, including its `/akashx/` path.
+Open the local URL printed by Astro, including its `/leasefi/` path.
 To inspect the production build:
 
 ```sh
@@ -41,9 +41,9 @@ The build includes a check for broken local links and missing assets.
 
 ## Edit the docs
 
-- Edit introductory and reference pages in `website/src/content/docs/`.
+- Edit workflow and introductory pages in `website/src/content/docs/`.
 - Edit the three runbooks in `docs/`: tenant CLI, testnet bridge, and local provider setup.
-- `website/scripts/sync-docs.mjs` copies those runbooks into ignored generated pages
+- `website/scripts/sync-docs.mjs` publishes those runbooks and splits the local lab into numbered provider and tenant chapters
   before development, checks, and builds. Restart the dev server after editing a runbook.
 - Internal planning documents, including the bridge diagram prompt, are not published.
 - Adjust navigation and the Pages URL in `website/astro.config.mjs`.
@@ -66,7 +66,7 @@ In GitHub, open **Settings → Pages → Build and deployment → Source** and s
 **GitHub Actions**. If the repository has deployment protection rules, allow the
 `main` branch in the `github-pages` environment.
 
-The configured URL is **https://tomash60.github.io/akashx/**. It becomes available
+The configured URL is **https://tomash60.github.io/leasefi/**. It becomes available
 after the first successful deployment. No personal access token is required: the
 deployment job uses GitHub's Pages and OIDC permissions.
 

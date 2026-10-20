@@ -1,0 +1,22 @@
+---
+import banner from '../../../docs/assets/readme-banner.svg?raw';
+
+const { siteTitleHref } = Astro.locals.starlightRoute;
+// Reuse the complete banner wordmark, including its purple Fi accent.
+const logo = banner.slice(
+  banner.indexOf('<text x="54"'),
+  banner.indexOf('<text x="58"'),
+);
+---
+
+<a href={siteTitleHref} class="site-logo" aria-label="LeaseFi home">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="50 110 380 94" aria-hidden="true" fill="none">
+    <Fragment set:html={logo} />
+  </svg>
+</a>
+
+<style>
+  .site-logo { display: inline-flex; align-items: center; width: 8rem; max-width: 100%; }
+  svg { display: block; width: 100%; height: auto; }
+  svg :global(text) { fill: var(--sl-color-white); }
+</style>

@@ -7,7 +7,7 @@ sequence diagram in the connected EA repository for this project's testnet
 bridge. Create editable EA elements, lifelines, messages, notes, and combined
 fragments. A Mermaid/PlantUML snippet or imported image alone is not the deliverable.
 
-Diagram title: **akashx — Sepolia USDC to Osmosis Testnet USDC via Skip Go**.
+Diagram title: **leasefi — Sepolia USDC to Osmosis Testnet USDC via Skip Go**.
 
 Model the route below and distinguish intended protocol execution from the
 current CLI's implementation and unresolved compatibility. This is a modeling
@@ -79,7 +79,7 @@ compute provider.
 Read-only CLI quote example, using a placeholder recipient:
 
 ```sh
-akashx bridge quote \
+leasefi bridge quote \
   --environment testnet \
   --amount 1 \
   --from-chain 11155111 \
@@ -100,7 +100,7 @@ Arrange application, orchestration, and settlement participants left to right:
 | Lifeline                            | Responsibility                                                            |
 | ----------------------------------- | ------------------------------------------------------------------------- |
 | User                                | Requests quote and authorizes hypothetical execution                      |
-| akashx CLI / SkipService            | Resolves inputs, maps addresses/signers, reports progress                 |
+| leasefi CLI / SkipService           | Resolves inputs, maps addresses/signers, reports progress                 |
 | Local signer(s)                     | Sepolia viem signer and intermediate Cosmos signer(s)                     |
 | Skip Go SDK                         | Execute route, request signatures, broadcast and track                    |
 | Skip Go API                         | Discover assets/chains, plan route, construct transactions, report status |
@@ -253,7 +253,7 @@ Use concise `alt`, `opt`, or `break` fragments:
 1. Discover actual EA MCP capabilities and inspect the connected model, selected
    package, and diagrams. Do not invent tool names, IDs, or supported operations.
 2. Read model conventions. Reuse an appropriate package or create
-   `akashx / Cross-chain funding` where supported. Inspect any matching diagram
+   `leasefi / Cross-chain funding` where supported. Inspect any matching diagram
    before updating; preserve unrelated content and avoid duplicates on reruns.
 3. Create a UML Interaction and Sequence diagram with native lifelines, ordered
    messages, execution occurrences where supported, fragments, and notes.

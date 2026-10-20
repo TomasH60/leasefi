@@ -23,9 +23,9 @@ afterEach(async () => {
   if (directory) await rm(directory, { recursive: true, force: true });
 });
 it('saves the signed transaction hash before broadcast and retains it after a timeout', async () => {
-  directory = await mkdtemp(join(tmpdir(), 'akashx-tx-'));
-  vi.stubEnv('AKASHX_CONFIG_DIR', directory);
-  vi.stubEnv('AKASHX_WALLET_PASSWORD', 'test-password-long');
+  directory = await mkdtemp(join(tmpdir(), 'leasefi-tx-'));
+  vi.stubEnv('LEASEFI_CONFIG_DIR', directory);
+  vi.stubEnv('LEASEFI_WALLET_PASSWORD', 'test-password-long');
   const owner = 'akash1wxr49evm8hddnx9ujsdtd86gk46s7ejnccqfmy';
   const tenant = new TenantService(defaultTenantConfig);
   vi.spyOn(tenant, 'verifyNetwork').mockResolvedValue({ network: 'sandbox-2', height: 1n });
@@ -63,8 +63,8 @@ it('saves the signed transaction hash before broadcast and retains it after a ti
   }
 });
 it('blocks another submission while the preceding signed transaction is unresolved', async () => {
-  directory = await mkdtemp(join(tmpdir(), 'akashx-pending-'));
-  vi.stubEnv('AKASHX_CONFIG_DIR', directory);
+  directory = await mkdtemp(join(tmpdir(), 'leasefi-pending-'));
+  vi.stubEnv('LEASEFI_CONFIG_DIR', directory);
   const { writePrivateJson } = await import('../../src/services/config-service.js');
   const owner = 'akash1wxr49evm8hddnx9ujsdtd86gk46s7ejnccqfmy';
   await writePrivateJson(join(directory, 'transactions', 'previous.json'), {

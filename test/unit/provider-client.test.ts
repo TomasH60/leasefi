@@ -38,8 +38,8 @@ it('pins the provider certificate to its chain identity and rejects a different 
   }
 });
 it('rejects a local client certificate paired with another private key', async () => {
-  const directory = await mkdtemp(join(tmpdir(), 'akashx-cert-'));
-  vi.stubEnv('AKASHX_CONFIG_DIR', directory);
+  const directory = await mkdtemp(join(tmpdir(), 'leasefi-cert-'));
+  vi.stubEnv('LEASEFI_CONFIG_DIR', directory);
   const owner = 'akash1wxr49evm8hddnx9ujsdtd86gk46s7ejnccqfmy';
   const tenant = new TenantService(defaultTenantConfig);
   try {

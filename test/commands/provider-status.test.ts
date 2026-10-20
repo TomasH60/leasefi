@@ -31,7 +31,7 @@ afterEach(() => {
   chalk.level = originalColorLevel;
   vi.restoreAllMocks();
   vi.clearAllMocks();
-  delete process.env.AKASHX_PROVIDER;
+  delete process.env.LEASEFI_PROVIDER;
 });
 
 describe('provider status command', () => {
@@ -61,7 +61,7 @@ describe('provider status command', () => {
   });
 
   it('accepts a provider from the environment', async () => {
-    process.env.AKASHX_PROVIDER = provider;
+    process.env.LEASEFI_PROVIDER = provider;
     mocks.getProvider.mockResolvedValue({
       provider: { owner: provider, hostUri: 'https://provider.example.com:8443' },
     });

@@ -10,7 +10,7 @@ const password = 'correct horse battery staple';
 const temporaryDirectories: string[] = [];
 
 async function temporaryWalletPath(): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), 'akashx-wallet-'));
+  const directory = await mkdtemp(join(tmpdir(), 'leasefi-wallet-'));
   temporaryDirectories.push(directory);
   return join(directory, 'wallet.json');
 }

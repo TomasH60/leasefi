@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 let directory: string;
 beforeEach(async () => {
-  directory = await mkdtemp(join(tmpdir(), 'akashx-command-'));
+  directory = await mkdtemp(join(tmpdir(), 'leasefi-command-'));
 });
 afterEach(async () => {
   await rm(directory, { recursive: true, force: true });
@@ -19,10 +19,10 @@ function run(...args: string[]) {
     timeout: 10_000,
     env: {
       ...process.env,
-      AKASHX_CONFIG_DIR: directory,
-      AKASHX_NETWORK: '',
-      AKASHX_WALLET_PASSWORD: '',
-      AKASHX_WALLET_FILE: '',
+      LEASEFI_CONFIG_DIR: directory,
+      LEASEFI_NETWORK: '',
+      LEASEFI_WALLET_PASSWORD: '',
+      LEASEFI_WALLET_FILE: '',
     },
   });
   if (result.error) throw result.error;

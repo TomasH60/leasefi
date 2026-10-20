@@ -4,7 +4,7 @@ import { resolveWalletPath } from '../services/wallet-service.js';
 
 export const walletFileFlag = Flags.string({
   description: 'Encrypted wallet file path',
-  env: 'AKASHX_WALLET_FILE',
+  env: 'LEASEFI_WALLET_FILE',
   helpValue: '<path>',
 });
 
@@ -13,9 +13,9 @@ export function getWalletPath(path?: string): string {
 }
 
 export function getWalletPassword(): string {
-  const password = process.env.AKASHX_WALLET_PASSWORD;
+  const password = process.env.LEASEFI_WALLET_PASSWORD;
   if (!password) {
-    throw new Error('Set AKASHX_WALLET_PASSWORD to unlock the encrypted wallet.');
+    throw new Error('Set LEASEFI_WALLET_PASSWORD to unlock the encrypted wallet.');
   }
   return password;
 }

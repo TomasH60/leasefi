@@ -52,11 +52,11 @@ export class WalletServiceError extends Error {
 
 export function getDefaultWalletPath(): string {
   const configHome = process.env.XDG_CONFIG_HOME ?? resolve(homedir(), '.config');
-  return resolve(configHome, 'akashx', 'wallet.json');
+  return resolve(configHome, 'leasefi', 'wallet.json');
 }
 
 export function resolveWalletPath(path?: string): string {
-  return resolve(path ?? process.env.AKASHX_WALLET_FILE ?? getDefaultWalletPath());
+  return resolve(path ?? process.env.LEASEFI_WALLET_FILE ?? getDefaultWalletPath());
 }
 
 export class WalletService {
@@ -172,7 +172,7 @@ export class WalletService {
   private validatePassword(password: string): void {
     if (password.length < MINIMUM_PASSWORD_LENGTH) {
       throw new WalletServiceError(
-        `AKASHX_WALLET_PASSWORD must contain at least ${MINIMUM_PASSWORD_LENGTH} characters.`,
+        `LEASEFI_WALLET_PASSWORD must contain at least ${MINIMUM_PASSWORD_LENGTH} characters.`,
       );
     }
   }

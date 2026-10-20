@@ -11,7 +11,7 @@ export default class WalletAddress extends Command {
   static override description = 'Show a chain address derived from the encrypted wallet';
 
   static override examples = [
-    'AKASHX_WALLET_PASSWORD="a-long-password" <%= config.bin %> wallet address',
+    'LEASEFI_WALLET_PASSWORD="a-long-password" <%= config.bin %> wallet address',
   ];
 
   static override flags = {

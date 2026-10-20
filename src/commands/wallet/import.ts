@@ -11,7 +11,7 @@ export default class WalletImport extends Command {
   static override description = 'Import a recovery phrase into an encrypted Akash wallet';
 
   static override examples = [
-    'AKASHX_WALLET_PASSWORD="a-long-password" AKASHX_WALLET_MNEMONIC="word ..." <%= config.bin %> wallet import',
+    'LEASEFI_WALLET_PASSWORD="a-long-password" LEASEFI_WALLET_MNEMONIC="word ..." <%= config.bin %> wallet import',
   ];
 
   static override flags = {
@@ -20,9 +20,9 @@ export default class WalletImport extends Command {
 
   async run(): Promise<void> {
     const { flags } = await this.parse(WalletImport);
-    const mnemonic = process.env.AKASHX_WALLET_MNEMONIC;
+    const mnemonic = process.env.LEASEFI_WALLET_MNEMONIC;
     if (!mnemonic) {
-      this.error('Set AKASHX_WALLET_MNEMONIC to the recovery phrase to import.');
+      this.error('Set LEASEFI_WALLET_MNEMONIC to the recovery phrase to import.');
     }
 
     try {

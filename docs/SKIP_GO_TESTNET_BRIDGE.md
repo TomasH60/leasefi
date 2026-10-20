@@ -1,6 +1,6 @@
 # Test Sepolia USDC → Osmosis testnet USDC
 
-This runbook uses the `akashx` CLI to quote and test this bridge:
+This runbook uses the `leasefi` CLI to quote and test this bridge:
 
 ```text
 Ethereum Sepolia (11155111): USDC
@@ -50,7 +50,7 @@ an IBC token representation. There is no AKT conversion in this test.
 ## 2. Request a quote — no wallet secrets needed
 
 ```sh
-akashx bridge quote \
+leasefi bridge quote \
   --environment testnet \
   --amount 1 \
   --from-chain 11155111 \
@@ -89,25 +89,25 @@ Get Sepolia test USDC from the [Circle faucet](https://faucet.circle.com/),
 selecting Ethereum Sepolia, and fund the same address with Sepolia ETH.
 Use a dedicated test account without mainnet assets.
 
-The following prompts use zsh, the shell configured for this project. Enter
+The following prompts use Bash on Linux. Enter
 secrets locally; do not paste them into chat or commit them to a file.
 
 ```sh
-read -s "AKASHX_EVM_PRIVATE_KEY?Dedicated Sepolia account private key: "
+read -r -s -p "Dedicated Sepolia account private key: " LEASEFI_EVM_PRIVATE_KEY
 echo
-export AKASHX_EVM_PRIVATE_KEY
-export AKASHX_EVM_RPC_URL='https://ethereum-sepolia-rpc.publicnode.com'
+export LEASEFI_EVM_PRIVATE_KEY
+export LEASEFI_EVM_RPC_URL='https://ethereum-sepolia-rpc.publicnode.com'
 
-read -s "AKASHX_WALLET_PASSWORD?CLI wallet password: "
+read -r -s -p "CLI wallet password: " LEASEFI_WALLET_PASSWORD
 echo
-export AKASHX_WALLET_PASSWORD
+export LEASEFI_WALLET_PASSWORD
 ```
 
 Use your existing CLI wallet password if a wallet already exists. For a new
 wallet, choose at least 12 characters and run:
 
 ```sh
-akashx wallet create
+leasefi wallet create
 ```
 
 Back up the recovery phrase printed by wallet creation. Do not run creation
@@ -117,9 +117,9 @@ resolve Injective signer compatibility.
 If needed, configure an optional Skip API key:
 
 ```sh
-read -s "AKASHX_SKIP_API_KEY?Skip API key: "
+read -r -s -p "Skip API key: " LEASEFI_SKIP_API_KEY
 echo
-export AKASHX_SKIP_API_KEY
+export LEASEFI_SKIP_API_KEY
 ```
 
 ## 4. Check execution support before submitting
@@ -144,10 +144,10 @@ Relevant implementation: `src/services/skip-service.ts` and
 address by default. To display the Injective signer used by the bridge, run:
 
 ```sh
-akashx wallet address --prefix inj
+leasefi wallet address --prefix inj
 ```
 
-Use the same `--wallet-file` or `AKASHX_WALLET_FILE` as the bridge command.
+Use the same `--wallet-file` or `LEASEFI_WALLET_FILE` as the bridge command.
 Fund this address with testnet INJ from the
 [Injective testnet faucet](https://testnet.faucet.injective.network/).
 The reported gas check required `0.00035 INJ`; fund more than the estimate
@@ -176,7 +176,7 @@ authorizes ERC-20 approval and route transaction submission. The CLI obtains
 and prints a fresh quote before executing it; it does not ask again.
 
 ```sh
-akashx bridge send \
+leasefi bridge send \
   --environment testnet \
   --amount 1 \
   --from-chain 11155111 \
@@ -203,7 +203,7 @@ not the ERC-20 approval hash:
 ```sh
 export BRIDGE_TX_HASH='0x_YOUR_SEPOLIA_BRIDGE_TRANSACTION_HASH'
 
-akashx bridge status "$BRIDGE_TX_HASH" \
+leasefi bridge status "$BRIDGE_TX_HASH" \
   --chain-id 11155111
 ```
 
@@ -252,10 +252,10 @@ If it stalls or fails:
 In each terminal where they were set:
 
 ```sh
-unset AKASHX_EVM_PRIVATE_KEY
-unset AKASHX_EVM_RPC_URL
-unset AKASHX_SKIP_API_KEY
-unset AKASHX_WALLET_PASSWORD
+unset LEASEFI_EVM_PRIVATE_KEY
+unset LEASEFI_EVM_RPC_URL
+unset LEASEFI_SKIP_API_KEY
+unset LEASEFI_WALLET_PASSWORD
 unset OSMOSIS_ADDRESS
 unset BRIDGE_TX_HASH
 ```

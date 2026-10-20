@@ -1,9 +1,9 @@
 ---
 title: Command reference
-description: Find the akashx command for each stage of the tenant and bridge workflows.
+description: Find the leasefi command for each stage of the tenant and bridge workflows.
 ---
 
-Use `akashx <command> --help` for the full argument and flag reference for your
+Use `leasefi <command> --help` for the full argument and flag reference for your
 installed version. Run `npm run build` after updating the CLI source.
 
 ## Configuration and diagnostics
@@ -20,7 +20,7 @@ installed version. Run `npm run build` after updating the CLI source.
 | Command                         | Purpose                                                        |
 | ------------------------------- | -------------------------------------------------------------- |
 | `wallet create`                 | Create an encrypted wallet and print its recovery phrase once. |
-| `wallet import`                 | Import the phrase in `AKASHX_WALLET_MNEMONIC`.                 |
+| `wallet import`                 | Import the phrase in `LEASEFI_WALLET_MNEMONIC`.                |
 | `wallet address --prefix akash` | Show a derived address; `inj` uses Injective derivation.       |
 | `wallet balance [address]`      | Query balances on the configured Akash chain.                  |
 | `fund mint-act <amount> --yes`  | Burn an explicit `uakt` amount to mint ACT.                    |
@@ -60,7 +60,7 @@ bid acceptance, `--bseq`. Use the values returned by the chain.
 ## Combined workflow
 
 ```sh
-akashx deployment deploy web.yaml \
+leasefi deployment deploy web.yaml \
   --dseq "$DSEQ" \
   --deposit 500000uact \
   --provider "$PROVIDER" \

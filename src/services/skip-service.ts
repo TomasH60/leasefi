@@ -117,7 +117,7 @@ export function normalizeEvmPrivateKey(privateKey: string): Hex {
   const normalized = trimmed.startsWith('0x') ? trimmed : `0x${trimmed}`;
   if (!/^0x[\da-fA-F]{64}$/.test(normalized)) {
     throw new SkipServiceError(
-      'AKASHX_EVM_PRIVATE_KEY must contain exactly 64 hexadecimal characters, optionally prefixed with 0x.',
+      'LEASEFI_EVM_PRIVATE_KEY must contain exactly 64 hexadecimal characters, optionally prefixed with 0x.',
     );
   }
   return normalized as Hex;
@@ -158,7 +158,7 @@ export class SkipService {
     private readonly environment: BridgeEnvironment = 'testnet',
     private readonly signerFactory: EvmSignerFactory = createEvmSigner,
   ) {
-    this.api.configure(process.env.AKASHX_SKIP_API_KEY);
+    this.api.configure(process.env.LEASEFI_SKIP_API_KEY);
   }
 
   async getBridgeQuote(request: BridgeRequest): Promise<BridgeQuote> {

@@ -3,6 +3,11 @@ title: Bridge overview
 description: Quote, send, and track cross-chain routes through Skip Go.
 ---
 
+This is an optional funding path after [tenant wallet setup](../guides/tenant-identity/)
+and [connecting that wallet to LeaseFi](../use-leasefi/). For the local sandbox lab,
+follow the faucet and ACT funding steps in [the deployment workflow](../deploy-with-leasefi/).
+The Sepolia → Osmosis testnet route does not fund `sandbox-2`.
+
 Bridge commands use Skip Go and accept `--environment testnet|mainnet`, defaulting to
 `testnet`. The selection filters Skip Go's live chain and asset registries. Mainnet permits
 routes containing swaps; testnet requires the explicit `--allow-swap` flag.
@@ -12,11 +17,11 @@ by symbol, address, or denomination. If a symbol refers to multiple tokens on on
 the command reports the available identifiers instead of choosing one silently.
 
 Basic Skip Go routes work without an API key. Anonymous requests share a restrictive rate
-limit; `AKASHX_SKIP_API_KEY` can be set later for authenticated access. Request a read-only
+limit; `LEASEFI_SKIP_API_KEY` can be set later for authenticated access. Request a read-only
 mainnet quote without signing or submitting anything:
 
 ```sh
-akashx bridge quote \
+leasefi bridge quote \
   --environment mainnet \
   --amount 5 \
   --from-chain base \
@@ -35,11 +40,11 @@ wallet. The source address is derived from the private key, and the CLI refuses 
 if the RPC chain ID differs from `--from-chain`.
 
 ```sh
-export AKASHX_WALLET_PASSWORD='your-wallet-password'
-export AKASHX_EVM_RPC_URL=https://your-base-rpc.example
-export AKASHX_EVM_PRIVATE_KEY=0x_DEDICATED_PRIVATE_KEY
+export LEASEFI_WALLET_PASSWORD='your-wallet-password'
+export LEASEFI_EVM_RPC_URL=https://your-base-rpc.example
+export LEASEFI_EVM_PRIVATE_KEY=0x_DEDICATED_PRIVATE_KEY
 
-akashx bridge send \
+leasefi bridge send \
   --environment mainnet \
   --amount 5 \
   --from-chain base \
@@ -58,7 +63,7 @@ multi-transaction signing, broadcasting, relaying, and tracking.
 Check a printed transaction hash using the chain where that transaction was broadcast:
 
 ```sh
-akashx bridge status 0x_SOURCE_TRANSACTION_HASH \
+leasefi bridge status 0x_SOURCE_TRANSACTION_HASH \
   --chain-id 8453
 ```
 

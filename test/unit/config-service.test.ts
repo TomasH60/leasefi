@@ -6,9 +6,9 @@ import { readConfig, setConfig } from '../../src/services/config-service.js';
 import { getConfiguredWalletPath } from '../../src/lib/wallet-flags.js';
 let directory: string;
 beforeEach(async () => {
-  directory = await mkdtemp(join(tmpdir(), 'akashx-config-'));
-  vi.stubEnv('AKASHX_CONFIG_DIR', directory);
-  vi.stubEnv('AKASHX_WALLET_FILE', '');
+  directory = await mkdtemp(join(tmpdir(), 'leasefi-config-'));
+  vi.stubEnv('LEASEFI_CONFIG_DIR', directory);
+  vi.stubEnv('LEASEFI_WALLET_FILE', '');
 });
 afterEach(async () => {
   vi.unstubAllEnvs();
@@ -16,7 +16,7 @@ afterEach(async () => {
 });
 it('applies flags over environment over saved configuration', async () => {
   await setConfig('network', 'saved-1');
-  vi.stubEnv('AKASHX_NETWORK', 'env-1');
+  vi.stubEnv('LEASEFI_NETWORK', 'env-1');
   expect((await readConfig()).network).toBe('env-1');
   expect((await readConfig({ network: 'flag-1' })).network).toBe('flag-1');
 });
@@ -29,7 +29,7 @@ it('does not persist secrets or unsafe endpoint credentials', async () => {
 it('uses a saved wallet path across old and new command groups', async () => {
   await setConfig('walletFile', join(directory, 'wallet.json'));
   expect(await getConfiguredWalletPath()).toBe(join(directory, 'wallet.json'));
-  vi.stubEnv('AKASHX_WALLET_FILE', join(directory, 'env.json'));
+  vi.stubEnv('LEASEFI_WALLET_FILE', join(directory, 'env.json'));
   expect(await getConfiguredWalletPath()).toBe(join(directory, 'env.json'));
   expect(await getConfiguredWalletPath(join(directory, 'flag.json'))).toBe(
     join(directory, 'flag.json'),

@@ -11,8 +11,8 @@ export default class WalletCreate extends Command {
   static override description = 'Create an encrypted Akash wallet';
 
   static override examples = [
-    'AKASHX_WALLET_PASSWORD="a-long-password" <%= config.bin %> wallet create',
-    'AKASHX_WALLET_PASSWORD="a-long-password" <%= config.bin %> wallet create --wallet-file ./wallet.json',
+    'LEASEFI_WALLET_PASSWORD="a-long-password" <%= config.bin %> wallet create',
+    'LEASEFI_WALLET_PASSWORD="a-long-password" <%= config.bin %> wallet create --wallet-file ./wallet.json',
   ];
 
   static override flags = {

@@ -19,8 +19,8 @@ export const defaultTenantConfig: TenantConfig = {
 };
 export function dataDirectory(): string {
   return resolve(
-    process.env.AKASHX_CONFIG_DIR ??
-      join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'akashx'),
+    process.env.LEASEFI_CONFIG_DIR ??
+      join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'leasefi'),
   );
 }
 export const configKeys = [
@@ -63,13 +63,13 @@ export async function readConfig(overrides: Partial<TenantConfig> = {}): Promise
   validateConfig(stored);
   const env: Partial<TenantConfig> = {};
   const names = {
-    network: 'AKASHX_NETWORK',
-    rpc: 'AKASHX_RPC_URL',
-    grpc: 'AKASHX_GRPC_URL',
-    walletFile: 'AKASHX_WALLET_FILE',
-    provider: 'AKASHX_PROVIDER',
-    providerCa: 'AKASHX_PROVIDER_CA',
-    gasPrice: 'AKASHX_GAS_PRICE',
+    network: 'LEASEFI_NETWORK',
+    rpc: 'LEASEFI_RPC_URL',
+    grpc: 'LEASEFI_GRPC_URL',
+    walletFile: 'LEASEFI_WALLET_FILE',
+    provider: 'LEASEFI_PROVIDER',
+    providerCa: 'LEASEFI_PROVIDER_CA',
+    gasPrice: 'LEASEFI_GAS_PRICE',
   } as const;
   for (const [key, name] of Object.entries(names))
     if (process.env[name]) env[key as keyof TenantConfig] = process.env[name];

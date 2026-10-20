@@ -4,15 +4,20 @@ title: Akash local network deployment setup
 
 # Akash local network deployment setup
 
+The official Akash pages linked beside each step provide supporting documentation
+for the underlying setup and commands. This guide adapts those workflows to a
+local Linux provider on `sandbox-2`; upstream examples may use a different network
+or production topology. Keep this guide’s sandbox endpoints and lab settings.
+
 ## Provider requirements:
 
-- Windows PC with Ubuntu running in WSL 2.
-- Docker Engine installed inside WSL.
-- K3s, kubectl, Helm, and socat installed inside WSL.
+- A native Linux provider machine (Ubuntu or Debian with systemd).
+- Docker Engine installed on the Linux provider.
+- K3s, kubectl, Helm, and socat installed on the Linux provider.
 - Akash provider CLI and Kubernetes operators installed.
 - A registered provider wallet funded with sandbox AKT.
 - Access to the `sandbox-2` RPC.
-- Network access from the Mac to the provider API and the container’s assigned port.
+- Network access from the tenant machine to the provider API and the container’s assigned port.
 - A healthy inventory operator that detects the PC’s available resources.
 
 ## Tenant requirements:
@@ -30,7 +35,9 @@ title: Akash local network deployment setup
 
 ### Step 1. Configure the Kubernetes cluster on the provider PC
 
-Run this in Ubuntu WSL. It assumes Docker Engine and K3s are installed, but K3s has not yet been configured for this Akash lab.
+> **Official Akash documentation:** [Provider installation preparation](https://akash.network/docs/providers/setup-and-installation/kubespray/provider-installation-prep/).
+
+Run this on the Linux provider. It assumes Docker Engine and K3s are installed, but K3s has not yet been configured for this Akash lab.
 
 ```bash
 sudo systemctl enable --now docker
@@ -39,7 +46,7 @@ sudo mkdir -p /etc/rancher/k3s
 
 sudo tee /etc/rancher/k3s/config.yaml > /dev/null <<'YAML'
 docker: true
-node-name: akash-wsl
+node-name: akash-provider
 YAML
 
 sudo systemctl restart k3s
@@ -50,7 +57,7 @@ sudo systemctl restart k3s
 - `node-name` gives the provider node a stable name.
 - Restarting K3s applies the configuration.
 
-K3s creates an administrator kubeconfig at `/etc/rancher/k3s/k3s.yaml`. Copy it so your normal WSL user can run `kubectl`:
+K3s creates an administrator kubeconfig at `/etc/rancher/k3s/k3s.yaml`. Copy it so your normal Linux user can run `kubectl`:
 
 ```bash
 mkdir -p "$HOME/.kube"
@@ -60,9 +67,9 @@ sudo install \
   -g "$(id -gn)" \
   -m 600 \
   /etc/rancher/k3s/k3s.yaml \
-  "$HOME/.kube/akash-wsl.yaml"
+  "$HOME/.kube/akash-provider.yaml"
 
-export KUBECONFIG="$HOME/.kube/akash-wsl.yaml"
+export KUBECONFIG="$HOME/.kube/akash-provider.yaml"
 
 kubectl get nodes
 ```
@@ -72,14 +79,16 @@ kubectl get nodes
 - `-m 600` restricts access to that user because kubeconfig contains cluster administrator credentials.
 - `KUBECONFIG` tells `kubectl` which cluster access file to use.
 
-Continue when `kubectl get nodes` shows `akash-wsl` with status `Ready`. No Akash provider or operator has been deployed yet.
+Continue when `kubectl get nodes` shows `akash-provider` with status `Ready`. No Akash provider or operator has been deployed yet.
 
 ### Step 2. Prepare Kubernetes and install the Akash operators
 
-Run these commands in Ubuntu WSL. Keep `KUBECONFIG` set to the file created in Step 1.
+> **Official Akash documentation:** [Provider installation](https://akash.network/docs/providers/setup-and-installation/kubespray/provider-installation/).
+
+Run these commands on the Linux provider. Keep `KUBECONFIG` set to the file created in Step 1.
 
 ```bash
-export KUBECONFIG="$HOME/.kube/akash-wsl.yaml"
+export KUBECONFIG="$HOME/.kube/akash-provider.yaml"
 
 kubectl create namespace akash-services
 kubectl create namespace lease
@@ -89,7 +98,7 @@ kubectl label namespace akash-services akash.network=true
 kubectl label namespace akash-services akash.network/name=akash-services
 kubectl label namespace lease akash.network=true
 kubectl label namespace akash-gateway akash.network=true
-kubectl label node akash-wsl akash.network=true
+kubectl label node akash-provider akash.network=true
 ```
 
 The namespaces separate provider components, lease records, and gateway resources. The labels identify them and the K3s node to Akash. Because this is a fresh cluster, the `create` commands should succeed; do not recreate namespaces if they already exist.
@@ -137,7 +146,7 @@ kubectl rollout status deployment/operator-hostname \
 kubectl get pods --namespace akash-services
 ```
 
-`--timeout=300s` limits each readiness wait to five minutes. Continue when both operators are ready and the inventory operator remains stable. In our earlier WSL run, Kubernetes reported GPU capacity but Akash could not identify the GPU, causing the inventory operator to restart. We need to check for that before installing the provider.
+`--timeout=300s` limits each readiness wait to five minutes. Continue when both operators are ready and the inventory operator remains stable. If Kubernetes reports GPU capacity that Akash cannot identify, investigate the device plugin and inventory logs before advertising GPU resources.
 
 ### Step 3. Check Akash connection
 
@@ -151,11 +160,13 @@ provider-services query block
 
 A returned block confirms that the provider PC can reach the RPC.
 
-Before offering GPU deployments, resolve the earlier mismatch: Kubernetes reported one GPU, but the inventory operator discovered zero.
+Before offering GPU deployments, verify that Kubernetes and the inventory operator agree on the available GPU resources.
 
 ### Step 4. Create and fund the provider wallet (OPTIONAL)
 
-Run these commands inside Ubuntu WSL. The provider and tenant should use separate wallets.
+> **Official Akash documentation:** [Provider installation preparation](https://akash.network/docs/providers/setup-and-installation/kubespray/provider-installation-prep/); [Install provider-services and prepare a wallet](https://akash.network/docs/developers/deployment/cli/installation-guide/).
+
+Run these commands on the Linux provider. The provider and tenant should use separate wallets.
 
 ```bash
 export AKASH_CHAIN_ID="sandbox-2"
@@ -206,7 +217,9 @@ Enter **exactly the same export password** that you chose during `keys export`. 
 
 ### Step 5. Create the provider configuration
 
-Run these commands inside Ubuntu WSL. This configuration targets `sandbox-2` and uses `provider.akash.test` as the provider hostname for the local network test.
+> **Official Akash documentation:** [Provider installation preparation](https://akash.network/docs/providers/setup-and-installation/kubespray/provider-installation-prep/).
+
+Run these commands on the Linux provider. This configuration targets `sandbox-2` and uses `provider.akash.test` as the provider hostname for the local network test.
 
 ```bash
 export AKASH_CHAIN_ID="sandbox-2"
@@ -256,7 +269,7 @@ chmod 600 "$HOME/akash-lab/provider.yaml"
 unset PROVIDER_KEY PROVIDER_KEY_PASSWORD
 ```
 
-The `lab: tomas-ssh` attribute lets the tenant target this provider in the test SDL. `domain: akash.test` makes its API hostname `provider.akash.test`; the Mac will need to resolve that name to the provider PC when we configure network access. GPU attributes are omitted until the inventory operator detects the GPU correctly.
+The `lab: tomas-ssh` attribute lets the tenant target this provider in the test SDL. `domain: akash.test` makes its API hostname `provider.akash.test`; the tenant machine will need to resolve that name to the provider PC when we configure network access. GPU attributes are omitted until the inventory operator detects the GPU correctly.
 
 Download the pricing script used by the provider chart:
 
@@ -271,6 +284,8 @@ For `curl`, `-f` fails on HTTP errors, `-sS` suppresses progress while retaining
 Keep `provider.yaml` private: it contains the encrypted wallet export and its decryption password.
 
 ### Step 6. Install and verify the provider
+
+> **Official Akash documentation:** [Provider installation](https://akash.network/docs/providers/setup-and-installation/kubespray/provider-installation/).
 
 The provider chart creates Gateway API resources, so install their CRDs first:
 
@@ -339,60 +354,76 @@ kubectl logs akash-provider-0 \
   --tail=100
 ```
 
-The next step is to verify registration on `sandbox-2` and make the provider API reachable from the Mac
+The next step is to verify registration on `sandbox-2` and make the provider API reachable from the tenant machine
 
 ### Step 7. Expose provider API
 
-Do this after `akash-provider-0` shows `1/1 Running`. Repeat the Windows and Mac IP steps whenever you change Wi-Fi networks.
+> **Official Akash documentation:** [Provider installation](https://akash.network/docs/providers/setup-and-installation/kubespray/provider-installation/).
 
-#### 1. Forward the provider API inside WSL
+Continue after `akash-provider-0` shows `1/1 Running`. This single-node Linux lab
+binds the provider API to the provider machine's LAN address. The tenant must be
+able to route to that address.
 
-In Ubuntu WSL, run this in a terminal and leave it open:
+#### 1. Select the provider address
+
+On the **Linux provider machine**, inspect the available addresses:
+
+```bash
+ip -br -4 address show
+```
+
+Choose the LAN interface address reachable from the tenant, not a loopback,
+container bridge, or pod address. Replace this example with your address:
+
+```bash
+export PROVIDER_IP="192.168.1.50"
+```
+
+Give this address to the tenant for its `provider.akash.test` hosts entry. If it
+changes, update the entry and restart the API forwarding command below.
+
+#### 2. Bind the provider API to the LAN interface
+
+Run this on the provider in a terminal and leave it open:
 
 ```bash
 kubectl port-forward \
   --namespace akash-services \
-  --address=0.0.0.0 \
+  --address="$PROVIDER_IP" \
   service/akash-provider \
   8443:8443 8444:8444
 ```
 
-`--namespace akash-services` selects the provider service. `--address=0.0.0.0` makes the forwarded ports reachable at WSL’s network address. Each `local:remote` pair forwards a WSL port to the same provider service port. If this command reports `socat not found`, install `socat` in WSL and run it again.
+Each `local:remote` pair forwards a host port to the corresponding provider service
+port. This foreground process is for the lab; it must be restarted if it exits or
+its selected pod terminates. See the [Kubernetes port-forward guide](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/).
 
-#### 2. Forward the ports from Windows to WSL
+#### 3. Check host firewall and routing
 
-Open **PowerShell as Administrator** on the provider PC:
+Allow tenant traffic to TCP ports `8443` and `8444` through the firewall used by
+your Linux host and any intervening network firewall. If UFW is already active,
+these example rules permit one tenant address (replace both addresses):
 
-```powershell
-$akashWindowsIp = (Get-NetIPAddress -InterfaceAlias "Wi-Fi" -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike "169.254.*" } | Select-Object -First 1 -ExpandProperty IPAddress)
-$akashWslIp = ((wsl.exe hostname -I).Trim() -split '\s+')[0]
-
-foreach ($port in 8443, 8444) {
-    netsh interface portproxy delete v4tov4 listenaddress=$akashWindowsIp listenport=$port 2>$null
-    netsh interface portproxy add v4tov4 listenaddress=$akashWindowsIp listenport=$port connectaddress=$akashWslIp connectport=$port
-}
-
-netsh interface portproxy show v4tov4
-$akashWindowsIp
+```bash
+export TENANT_IP="192.168.1.60"
+sudo ufw allow from "$TENANT_IP" to "$PROVIDER_IP" port 8443 proto tcp
+sudo ufw allow from "$TENANT_IP" to "$PROVIDER_IP" port 8444 proto tcp
+sudo ufw status verbose
 ```
 
-`-InterfaceAlias "Wi-Fi"` selects the Windows wireless adapter. `-AddressFamily IPv4` selects its IPv4 address. The `169.254.*` filter excludes an automatically assigned address that is not usable for this connection. `hostname -I` supplies WSL’s current IP. The `netsh` rules forward TCP ports `8443` and `8444` from Windows to WSL.
-
-Allow those ports through Windows Firewall for devices on the local network:
-
-```powershell
-if (-not (Get-NetFirewallRule -Name "AkashProviderLabAPI" -ErrorAction SilentlyContinue)) {
-    New-NetFirewallRule -Name "AkashProviderLabAPI" -DisplayName "Akash Provider Lab API" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8443,8444 -RemoteAddress LocalSubnet -Profile Any
-}
-```
-
-`-Direction Inbound` applies to connections arriving at Windows. `-Protocol TCP` and `-LocalPort 8443,8444` limit the rule to the provider API ports. `-RemoteAddress LocalSubnet` limits allowed clients to the local network. `-Profile Any` also works if Windows classifies a phone hotspot as a public network.
+Use equivalent rules if you manage nftables or firewalld instead. These API rules
+are additional to the cluster networking configuration; follow the
+[K3s firewall requirements](https://docs.k3s.io/installation/requirements) for your
+pod/service CIDRs and node topology. Do not enable a new firewall blindly on an
+existing cluster. Verify access from the tenant in the next step.
 
 ## Tenant setup:
 
 ### Step 1. Test connection to provider machine
 
-Point the tenant hostname at the Windows PC
+> **Official Akash documentation:** [Provider installation](https://akash.network/docs/providers/setup-and-installation/kubespray/provider-installation/).
+
+Point the tenant hostname at the Linux provider machine
 
 On the tenant, edit `/etc/hosts`:
 
@@ -400,10 +431,10 @@ On the tenant, edit `/etc/hosts`:
 sudo nano /etc/hosts
 ```
 
-Add or update this line, replacing the IP with the value printed by `$akashWindowsIp`:
+Add or update this line, replacing `PROVIDER_LAN_IP` with the provider address selected above:
 
 ```text
-WINDOWS_WIFI_IP provider.akash.test
+PROVIDER_LAN_IP provider.akash.test
 ```
 
 Save the file. The hostname stays `provider.akash.test`; only its IP changes when the provider PC joins a different network.
@@ -415,11 +446,13 @@ nc -vz provider.akash.test 8443
 nc -vz provider.akash.test 8444
 ```
 
-For `nc`, `-v` prints connection details and `-z` checks whether the TCP port accepts a connection without sending data. Both tests should succeed. A timeout can mean Windows Firewall is blocking traffic or the Wi-Fi network prevents its connected devices from reaching each other.
+For `nc`, `-v` prints connection details and `-z` checks whether the TCP port accepts a connection without sending data. Both tests should succeed. A timeout can mean a host or network firewall is blocking traffic, the forwarding process has stopped, or the tenant cannot route to the provider.
 
-Keep the WSL `kubectl port-forward` terminal running during the test. Forwarding the SSH container’s assigned port comes later, after the tenant has created a lease.
+Keep the provider API `kubectl port-forward` terminal running during the test. Checking the workload’s assigned SSH port comes later, after the tenant has created a lease.
 
 ### Step 2. Create and fund the tenant wallet
+
+> **Official Akash documentation:** [Install provider-services and prepare a wallet](https://akash.network/docs/developers/deployment/cli/installation-guide/).
 
 Run these commands on the tenant PC:
 
@@ -457,6 +490,8 @@ Keep some `uakt` for transaction fees. The deployment deposit and lease will use
 
 ### Step 3. Create the tenant client certificate
 
+> **Official Akash documentation:** [CLI commands: certificates, deployments, bids, leases, and manifests](https://akash.network/docs/developers/deployment/cli/commands-reference/).
+
 The certificate lets the tenant authenticate when sending a manifest to the provider API:
 
 ```bash
@@ -478,6 +513,8 @@ provider-services query cert list --owner "$OWNER"
 `--owner` limits the results to the tenant address. Next, prepare the SSH key and the container’s SDL file.
 
 ### Step 4. Prepare the SSH container
+
+> **Official Akash documentation:** [SDL syntax: services, exposed ports, resources, and placement](https://akash.network/docs/developers/deployment/akash-sdl/syntax-reference/).
 
 Run these commands on the tenant PC. Create a dedicated SSH key if you do not already have one for this test:
 
@@ -555,6 +592,8 @@ Next, fund the tenant wallet with ACT and create the on-chain deployment.
 
 ### Step 5. Fund and create the deployment
 
+> **Official Akash documentation:** [CLI commands: certificates, deployments, bids, leases, and manifests](https://akash.network/docs/developers/deployment/cli/commands-reference/).
+
 Run these commands on the tenant PC:
 
 ```bash
@@ -615,14 +654,18 @@ Creating the deployment places the order on-chain. The provider can now evaluate
 
 ### Step 6. Check the provider’s bid and create the lease
 
-Run these commands on the tenant PC. Use the same wallet that signed the deployment in Step 5. If you used `mac-tenant`, set:
+> **Official Akash documentation:** [CLI commands: certificates, deployments, bids, leases, and manifests](https://akash.network/docs/developers/deployment/cli/commands-reference/).
+
+Run these commands on the tenant PC using the same wallet that signed the
+deployment in Step 5. Restore its key name if this is a new terminal:
 
 ```bash
-export TENANT_KEY_NAME="mac-tenant"
+export TENANT_KEY_NAME="my-tenant"
 export OWNER="$(provider-services keys show "$TENANT_KEY_NAME" -a)"
 ```
 
-If you used `my-tenant` in Step 5, set `TENANT_KEY_NAME` to `my-tenant` instead. Changing wallets does not change the owner of an existing deployment.
+Use your actual key name if it differs. Changing wallets does not change the owner
+of an existing deployment.
 
 Confirm that the deployment exists:
 
@@ -684,6 +727,8 @@ provider-services query market lease list \
 
 ### Step 7. Send the manifest
 
+> **Official Akash documentation:** [CLI commands: certificates, deployments, bids, leases, and manifests](https://akash.network/docs/developers/deployment/cli/commands-reference/).
+
 On the tenant PC, send the **same `ssh.yaml`** used to create the deployment:
 
 ```bash
@@ -708,26 +753,44 @@ provider-services lease-status \
 
 Wait until `services.ssh.ready_replicas` is `1`. Under `forwarded_ports.ssh`, record **`externalPort`**. This is the port the tenant PC connects to; `2222` is the port inside the container.
 
-### Step 8. Forward the SSH port through Windows
+### Step 8. Verify the workload port on Linux
 
-Run this in **Administrator PowerShell on the provider PC**. Replace `30625` with the `externalPort` from Step 7:
+> **Official Akash documentation:** [Provider installation](https://akash.network/docs/providers/setup-and-installation/kubespray/provider-installation/); [SDL syntax: services, exposed ports, resources, and placement](https://akash.network/docs/developers/deployment/akash-sdl/syntax-reference/).
 
-```powershell
-$sshPort = 30625
-$windowsIp = (Get-NetIPAddress -InterfaceAlias "Wi-Fi" -AddressFamily IPv4).IPAddress
-$wslIp = ((wsl.exe hostname -I).Trim() -split '\s+')[0]
+On the **Linux provider machine**, inspect the workload services and their assigned
+ports after the manifest is accepted:
 
-netsh interface portproxy add v4tov4 listenaddress=$windowsIp listenport=$sshPort connectaddress=$wslIp connectport=$sshPort
-New-NetFirewallRule -DisplayName "Akash SSH $sshPort" -Direction Inbound -Action Allow -Protocol TCP -LocalPort $sshPort -RemoteAddress LocalSubnet
-
-$windowsIp
+```bash
+kubectl get services --all-namespaces -o wide
+kubectl get pods --all-namespaces -o wide
 ```
 
-`listenaddress` binds the port to the provider PC’s current Wi-Fi IP. `connectaddress` forwards connections to its current WSL IP. Both addresses can change when the provider PC joins another network or WSL restarts. The firewall rule allows TCP connections to the assigned SSH port from the local subnet.
+Find the service for this lease and match its exposed port to `externalPort` from
+Step 7. For this single-node lab, the tenant connects to the provider's LAN IP and
+the exposed workload port. Do not substitute the container's `2222` port for the
+reported external port. For a multi-node or load-balanced provider, use the
+advertised reachable workload endpoint instead.
+
+Allow that TCP port through your applicable host and network firewall rules.
+For an already active UFW setup, replace `30625` with the lease's actual external
+port and use your tenant and provider addresses:
+
+```bash
+export PROVIDER_IP="192.168.1.50"
+export TENANT_IP="192.168.1.60"
+export SSH_EXTERNAL_PORT=30625
+sudo ufw allow from "$TENANT_IP" to "$PROVIDER_IP" port "$SSH_EXTERNAL_PORT" proto tcp
+```
+
+Kubernetes service traffic may traverse forwarding chains rather than the host
+input chain. A UFW input rule alone does not establish that NodePort traffic is
+restricted or reachable; check your cluster's forwarding rules and any upstream
+firewall, then test from the tenant. No additional host-to-guest port proxy is
+part of this native Linux setup.
 
 ### Step 9. Connect from the tenant PC
 
-Use the Windows Wi-Fi IP printed in Step 8. If Step 1 already maps `provider.akash.test` to that IP, check the port and connect:
+Use the provider LAN IP selected during API setup. If Step 1 already maps `provider.akash.test` to that IP, check the port and connect:
 
 ```bash
 export SSH_EXTERNAL_PORT=30625
@@ -744,6 +807,8 @@ Replace `30625` with this lease’s `externalPort`. For `nc`, `-v` displays the 
 The SSH session is running inside the tenant’s container on the provider PC.
 
 ### Step 10. Close the deployment when finished
+
+> **Official Akash documentation:** [CLI commands: certificates, deployments, bids, leases, and manifests](https://akash.network/docs/developers/deployment/cli/commands-reference/).
 
 Run this on the tenant PC when you no longer need the container:
 
@@ -764,7 +829,7 @@ Run tenant commands on the **tenant PC**. In a new terminal, restore the values 
 export AKASH_CHAIN_ID="sandbox-2"
 export AKASH_NODE="https://rpc.sandbox-2.aksh.pw:443"
 export AKASH_KEYRING_BACKEND="file"
-export TENANT_KEY_NAME="mac-tenant"
+export TENANT_KEY_NAME="my-tenant"
 export OWNER="$(provider-services keys show "$TENANT_KEY_NAME" -a)"
 export PROVIDER="akash1f667m5r37r6gchhc9jfr7enzl8fvswv7ae3jvj"
 export DSEQ="REPLACE_WITH_DEPLOYMENT_DSEQ"
@@ -864,7 +929,7 @@ ssh -i "$HOME/.ssh/akash_lab_ed25519" \
   akash@provider.akash.test
 ```
 
-`-i` selects the tenant PC’s private key. `-p` selects the lease’s external SSH port. The hostname must point to the provider PC’s current Windows Wi-Fi IP.
+`-i` selects the tenant PC’s private key. `-p` selects the lease’s external SSH port. The hostname must point to the provider PC’s current LAN IP.
 
 ### Close the deployment
 
@@ -881,7 +946,7 @@ provider-services tx deployment close \
 
 ### Provider PC checks
 
-Run these inside WSL on the **provider PC**:
+Run these on the Linux provider on the **provider PC**:
 
 ```bash
 sudo kubectl get pods --namespace akash-services
@@ -906,12 +971,19 @@ sudo kubectl logs akash-provider-0 \
 
 `--since=30m` limits the search to recent logs. `grep -F` matches the owner and DSEQ literally.
 
-### Windows port-forwarding check
+### Linux networking checks
 
-Run this in PowerShell on the **provider PC**:
+Run these on the **Linux provider machine**:
 
-```powershell
-netsh interface portproxy show v4tov4
+```bash
+ip -br -4 address show
+sudo ss -ltnp '( sport = :8443 or sport = :8444 )'
+kubectl get services --all-namespaces -o wide
 ```
 
-Find a rule whose listening address is the provider PC’s **current Wi-Fi IP** and whose listening port matches the SSH `externalPort`. Its destination must be the current WSL IP and the same port.
+Verify that the API forwarding process binds the current LAN address and that the
+workload service exposes the port reported in lease status. A Kubernetes NodePort
+may be implemented by packet-forwarding rules rather than a listening process,
+so `ss` alone is not a NodePort readiness check. From the tenant, test both API
+ports and the workload port with `nc -vz` as shown above. If access fails, inspect
+routing and the active firewall rules on the path between the two machines.

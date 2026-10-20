@@ -1,7 +1,7 @@
 # Tenant command groups
 
-`akashx` manages tenant deployments. Docker/K3s installation, provider Helm releases,
-Windows firewall/port forwarding, and `/etc/hosts` remain in
+`leasefi` manages tenant deployments. Docker/K3s installation, provider Helm releases,
+Linux firewall and service networking, and `/etc/hosts` remain in
 [the lab setup guide](Akash%20local%20network%20deployment%20setup.md).
 These commands use the pinned Akash SDK directly, not an installed `provider-services` binary.
 The guide's `sandbox-2` is a public sandbox chain with a locally hosted provider.
@@ -14,7 +14,7 @@ From the repository root, build and link the CLI before using the commands below
 npm ci
 npm run build
 npm link
-akashx --help
+leasefi --help
 ```
 
 After updating the source, run `npm run build` again.
@@ -22,13 +22,13 @@ After updating the source, run `npm run build` again.
 ## Configuration and diagnostics
 
 ```sh
-akashx config show
-akashx config set network sandbox-2
-akashx config set rpc https://rpc.sandbox-2.aksh.pw:443
-akashx config set grpc https://grpc.sandbox-2.aksh.pw:443
-akashx config set walletFile /absolute/path/to/wallet.json
-akashx doctor
-akashx provider status akash1_PROVIDER_ADDRESS
+leasefi config show
+leasefi config set network sandbox-2
+leasefi config set rpc https://rpc.sandbox-2.aksh.pw:443
+leasefi config set grpc https://grpc.sandbox-2.aksh.pw:443
+leasefi config set walletFile /absolute/path/to/wallet.json
+leasefi doctor
+leasefi provider status akash1_PROVIDER_ADDRESS
 ```
 
 Configuration precedence: command flags, environment variables, saved configuration,
@@ -39,15 +39,21 @@ transactions are needed to test this workflow.
 
 Saved keys: `network`, `rpc`, `grpc`, `gasPrice`, `walletFile`, `provider`, `providerCa`.
 `provider` is the default for `provider status`; deployment bid selection is explicit.
-Environment overrides: `AKASHX_NETWORK`, `AKASHX_RPC_URL`, `AKASHX_GRPC_URL`,
-`AKASHX_GAS_PRICE`, `AKASHX_WALLET_FILE`, `AKASHX_PROVIDER`, `AKASHX_PROVIDER_CA`.
+Environment overrides: `LEASEFI_NETWORK`, `LEASEFI_RPC_URL`, `LEASEFI_GRPC_URL`,
+`LEASEFI_GAS_PRICE`, `LEASEFI_WALLET_FILE`, `LEASEFI_PROVIDER`, `LEASEFI_PROVIDER_CA`.
 Existing wallet commands and bridge sending also respect the saved wallet path.
 Bridge `--environment` still selects Skip's networks independently of tenant configuration.
 
 Configuration, transaction records, certificates, and deployment records live under
-`$XDG_CONFIG_HOME/akashx` (default `~/.config/akashx`). Override the storage directory
-with `AKASHX_CONFIG_DIR`. This does not move an existing wallet automatically.
+`$XDG_CONFIG_HOME/leasefi` (default `~/.config/leasefi`). Override the storage directory
+with `LEASEFI_CONFIG_DIR`. This does not move an existing wallet automatically.
 Do not store passwords or private keys with `config set`.
+
+When upgrading from a previously named build, existing data is not moved automatically.
+Set `LEASEFI_CONFIG_DIR` to your existing configuration directory and
+`LEASEFI_WALLET_FILE` to your existing encrypted wallet file to reuse them. Update shell
+scripts to use `leasefi` and the `LEASEFI_*` environment variables, then rerun `npm link`
+from the project root to install the renamed command.
 
 ## Wallet, funding, and certificates
 
@@ -55,13 +61,13 @@ Reuse `wallet create`, `wallet import`, and `wallet address`. The CLI password i
 separate from MetaMask's password and the source EVM private key.
 
 ```sh
-akashx wallet balance
+leasefi wallet balance
 # A public address can be inspected without unlocking a wallet:
-akashx wallet balance akash1_ADDRESS
-akashx fund mint-act 5000000uakt --yes
-akashx wallet balance
-akashx cert create --yes
-akashx cert status
+leasefi wallet balance akash1_ADDRESS
+leasefi fund mint-act 5000000uakt --yes
+leasefi wallet balance
+leasefi cert create --yes
+leasefi cert status
 ```
 
 Get sandbox AKT through the faucet in the lab guide. `mint-act` burns the explicit
@@ -81,19 +87,19 @@ The following values are examples: use the live minimum deposit from `doctor` an
 review the SDL's pricing cap. All mutation commands require `--yes`.
 
 ```sh
-akashx deployment init web.yaml
+leasefi deployment init web.yaml
 # Edit image, resources, placement attributes, and pricing before deployment.
-akashx deployment validate web.yaml
+leasefi deployment validate web.yaml
 
 export DSEQ="$(date +%s)"
-akashx deployment create web.yaml --dseq "$DSEQ" --deposit 500000uact --yes
-akashx deployment bids "$DSEQ"
-akashx lease create "$DSEQ" --provider akash1_PROVIDER_ADDRESS --gseq 1 --oseq 1 --bseq 1 --yes
-akashx lease list "$DSEQ"
-akashx deployment manifest send web.yaml "$DSEQ" --provider akash1_PROVIDER_ADDRESS --yes
-akashx deployment status "$DSEQ" --workload --provider akash1_PROVIDER_ADDRESS
-akashx deployment logs "$DSEQ" --provider akash1_PROVIDER_ADDRESS --follow
-akashx deployment close "$DSEQ" --yes
+leasefi deployment create web.yaml --dseq "$DSEQ" --deposit 500000uact --yes
+leasefi deployment bids "$DSEQ"
+leasefi lease create "$DSEQ" --provider akash1_PROVIDER_ADDRESS --gseq 1 --oseq 1 --bseq 1 --yes
+leasefi lease list "$DSEQ"
+leasefi deployment manifest send web.yaml "$DSEQ" --provider akash1_PROVIDER_ADDRESS --yes
+leasefi deployment status "$DSEQ" --workload --provider akash1_PROVIDER_ADDRESS
+leasefi deployment logs "$DSEQ" --provider akash1_PROVIDER_ADDRESS --follow
+leasefi deployment close "$DSEQ" --yes
 ```
 
 Use the actual group/order/bid sequences printed by `deployment bids`; the example
@@ -109,7 +115,7 @@ units, avoiding floating-point conversions.
 The web template is optional. For SSH, use your guide's SSH SDL and an existing SSH key:
 
 ```sh
-akashx deployment ssh "$DSEQ" --service ssh --user akash \
+leasefi deployment ssh "$DSEQ" --service ssh --user akash \
   --identity "$HOME/.ssh/akash_lab_ed25519" --port 2222
 ```
 
@@ -123,7 +129,7 @@ After funding and certificate publication, an explicit provider can be used for 
 full workflow. The SDL's pricing caps bound the bids you have authorized.
 
 ```sh
-akashx deployment deploy web.yaml --dseq "$DSEQ" \
+leasefi deployment deploy web.yaml --dseq "$DSEQ" \
   --deposit 500000uact --provider akash1_PROVIDER_ADDRESS --yes
 ```
 
@@ -135,8 +141,8 @@ A timeout leaves the deployment open and potentially accruing charges.
 After an interruption, inspect chain state first:
 
 ```sh
-akashx deployment status "$DSEQ"
-akashx deployment deploy web.yaml --dseq "$DSEQ" \
+leasefi deployment status "$DSEQ"
+leasefi deployment deploy web.yaml --dseq "$DSEQ" \
   --provider akash1_PROVIDER_ADDRESS --resume --yes
 ```
 
@@ -170,3 +176,9 @@ API references used for implementation:
 - Pinned local package: `@akashnetwork/chain-sdk@1.0.0-alpha.45` declarations and README.
 - [Provider v0.16.2 REST routes](https://github.com/akash-network/provider/blob/v0.16.2/gateway/rest/router.go)
 - [Provider v0.16.2 query parameters](https://github.com/akash-network/provider/blob/v0.16.2/gateway/rest/middleware.go)
+
+## Related official Akash documentation
+
+- [Install provider-services and prepare a wallet](https://akash.network/docs/developers/deployment/cli/installation-guide/)
+- [CLI commands: certificates, deployments, bids, leases, and manifests](https://akash.network/docs/developers/deployment/cli/commands-reference/)
+- [SDL syntax: services, exposed ports, resources, and placement](https://akash.network/docs/developers/deployment/akash-sdl/syntax-reference/)

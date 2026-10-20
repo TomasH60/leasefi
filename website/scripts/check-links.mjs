@@ -5,7 +5,7 @@ import process from 'node:process';
 
 const directory = fileURLToPath(new URL('../dist/', import.meta.url));
 const origin = 'https://tomash60.github.io';
-const base = '/akashx/';
+const base = '/leasefi/';
 async function walk(path) {
   const entries = await readdir(path, { withFileTypes: true });
   return (

@@ -1,0 +1,40 @@
+---
+import DefaultHero from '@astrojs/starlight/components/Hero.astro';
+import banner from '../../../docs/assets/readme-banner.svg?raw';
+
+// Share the README artwork, but let the page supply its background and font.
+const artwork = banner
+  .replace(/<defs>[\s\S]*?<\/defs>/, '')
+  .replace(/<rect\b[^>]*\brx="(?:22|21\.5)"[^>]*\/>/g, '')
+  .replace('id="title"', 'id="banner-title"')
+  .replace('id="description"', 'id="banner-description"')
+  .replace('aria-labelledby="title description"', 'aria-labelledby="banner-title banner-description"');
+---
+
+<div class="banner-hero">
+  <div class="banner-art" set:html={artwork} />
+  <DefaultHero />
+</div>
+
+<style>
+  .banner-art { overflow: hidden; }
+  .banner-art :global(svg) { display: block; width: 100%; height: auto; }
+  .banner-art :global(text[x='54']) { fill: var(--sl-color-white); }
+  .banner-art :global(text[x='58']) { fill: var(--sl-color-gray-2); }
+  .banner-hero :global(.hero) { grid-template-columns: 1fr; padding-block: 0 2rem; }
+  .banner-hero :global(.stack), .banner-hero :global(.copy) { align-items: center; text-align: center; }
+  .banner-hero :global(.actions) { justify-content: center; }
+  .banner-hero :global(.tagline) { max-width: 62ch; }
+  .banner-hero :global(h1) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  @media (max-width: 40rem) {
+    /* Keep the wordmark readable on phones; the terminal is decorative. */
+    .banner-art :global(svg) { width: 214.286%; max-width: none; }
+  }
+</style>

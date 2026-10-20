@@ -10,12 +10,12 @@ export default class ProviderStatus extends Command {
   static override flags = tenantFlags;
 
   static override args = {
-    provider: Args.string({ description: 'Provider address (or set AKASHX_PROVIDER)' }),
+    provider: Args.string({ description: 'Provider address (or set LEASEFI_PROVIDER)' }),
   };
 
   static override examples = [
     '<%= config.bin %> provider status akash1...',
-    'AKASHX_PROVIDER=akash1... <%= config.bin %> provider status',
+    'LEASEFI_PROVIDER=akash1... <%= config.bin %> provider status',
   ];
 
   async run(): Promise<void> {
@@ -24,7 +24,7 @@ export default class ProviderStatus extends Command {
     const provider = args.provider ?? config.provider;
 
     if (!provider) {
-      this.error('Provide a provider address or set AKASHX_PROVIDER.');
+      this.error('Provide a provider address or set LEASEFI_PROVIDER.');
     }
 
     try {

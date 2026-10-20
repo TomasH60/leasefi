@@ -29,11 +29,11 @@ export default class BridgeSend extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(BridgeSend);
     const environment = parseEnvironment(flags.environment);
-    const privateKey = process.env.AKASHX_EVM_PRIVATE_KEY;
-    const rpcUrl = process.env.AKASHX_EVM_RPC_URL;
+    const privateKey = process.env.LEASEFI_EVM_PRIVATE_KEY;
+    const rpcUrl = process.env.LEASEFI_EVM_RPC_URL;
 
-    if (!rpcUrl) this.error('Set AKASHX_EVM_RPC_URL to the source EVM RPC URL.');
-    if (!privateKey) this.error('Set AKASHX_EVM_PRIVATE_KEY to the source EVM private key.');
+    if (!rpcUrl) this.error('Set LEASEFI_EVM_RPC_URL to the source EVM RPC URL.');
+    if (!privateKey) this.error('Set LEASEFI_EVM_PRIVATE_KEY to the source EVM private key.');
 
     try {
       const walletService = new WalletService();

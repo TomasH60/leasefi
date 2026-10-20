@@ -1,5 +1,5 @@
 {
-  "name": "akashx",
+  "name": "leasefi",
   "version": "0.1.0",
   "private": true,
   "description": "A TypeScript CLI built with oclif",
@@ -8,11 +8,13 @@
     "node": "^22.18.0 || ^24.0.0"
   },
   "bin": {
-    "akashx": "bin/run.js"
+    "leasefi": "bin/run.js"
   },
   "files": [
     "bin/run.js",
-    "dist"
+    "dist",
+    "THIRD_PARTY_NOTICES.md",
+    "licenses"
   ],
   "scripts": {
     "dev": "node --import tsx bin/dev.js",
@@ -24,8 +26,8 @@
     "prepack": "npm run build"
   },
   "oclif": {
-    "bin": "akashx",
-    "dirname": "akashx",
+    "bin": "leasefi",
+    "dirname": "leasefi",
     "commands": "./dist/commands",
     "topicSeparator": " ",
     "topics": {
@@ -77,5 +79,6 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.0",
     "vitest": "^4.1.11"
-  }
+  },
+  "license": "MIT"
 }

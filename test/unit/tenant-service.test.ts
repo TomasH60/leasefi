@@ -13,9 +13,9 @@ let directory: string;
 let service: TenantService;
 const owner = 'akash1wxr49evm8hddnx9ujsdtd86gk46s7ejnccqfmy';
 beforeEach(async () => {
-  directory = await mkdtemp(join(tmpdir(), 'akashx-tenant-'));
-  vi.stubEnv('AKASHX_CONFIG_DIR', directory);
-  vi.stubEnv('AKASHX_WALLET_PASSWORD', 'test-password-long');
+  directory = await mkdtemp(join(tmpdir(), 'leasefi-tenant-'));
+  vi.stubEnv('LEASEFI_CONFIG_DIR', directory);
+  vi.stubEnv('LEASEFI_WALLET_PASSWORD', 'test-password-long');
   service = new TenantService(defaultTenantConfig);
 });
 afterEach(async () => {

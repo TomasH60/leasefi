@@ -39,7 +39,7 @@ Requires **Node.js 22.18+ (22.x) or 24.x**.
 ```sh
 git clone https://github.com/TomasH60/leasefi.git
 cd leasefi
-npm ci
+npm install
 npm run build
 npm link
 
